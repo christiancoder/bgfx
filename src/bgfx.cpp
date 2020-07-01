@@ -12,6 +12,7 @@
 
 #include "topology.h"
 #include "version.h"
+#include "Remotery.h"
 
 #if BX_PLATFORM_OSX || BX_PLATFORM_IOS
 #	include <objc/message.h>
@@ -59,8 +60,14 @@ namespace bgfx
 
 	struct CallbackStub : public CallbackI
 	{
+		CallbackStub()
+		{
+		    rmt_CreateGlobalInstance(&_rmt);
+		}
+
 		virtual ~CallbackStub()
 		{
+			rmt_DestroyGlobalInstance(_rmt);
 		}
 
 		virtual void fatal(const char* _filePath, uint16_t _line, Fatal::Enum _code, const char* _str) override
@@ -96,16 +103,19 @@ namespace bgfx
 			bx::debugOutput(out);
 		}
 
-		virtual void profilerBegin(const char* /*_name*/, uint32_t /*_abgr*/, const char* /*_filePath*/, uint16_t /*_line*/) override
+		virtual void profilerBegin(const char* _name, uint32_t /*_abgr*/, const char* /*_filePath*/, uint16_t /*_line*/) override
 		{
+			rmt_BeginCPUSampleDynamic(_name, 0);
 		}
 
-		virtual void profilerBeginLiteral(const char* /*_name*/, uint32_t /*_abgr*/, const char* /*_filePath*/, uint16_t /*_line*/) override
+		virtual void profilerBeginLiteral(const char* _name, uint32_t /*_abgr*/, const char* /*_filePath*/, uint16_t /*_line*/) override
 		{
+			rmt_BeginCPUSampleDynamic(_name, 0);
 		}
 
 		virtual void profilerEnd() override
 		{
+			rmt_EndCPUSample();
 		}
 
 		virtual uint32_t cacheReadSize(uint64_t /*_id*/) override
@@ -151,6 +161,8 @@ namespace bgfx
 		virtual void captureFrame(const void* /*_data*/, uint32_t /*_size*/) override
 		{
 		}
+
+	    Remotery* _rmt;
 	};
 
 #ifndef BGFX_CONFIG_MEMORY_TRACKING

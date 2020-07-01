@@ -1155,7 +1155,7 @@ public:
 		m_clearValues = ClearValues(0x00000000, 1.0f, 0);
 
 		bgfx::Init init;
-		init.type     = args.m_type;
+		init.type = bgfx::RendererType::Vulkan;// args.m_type;
 		init.vendorId = args.m_pciId;
 		init.resolution.width  = m_viewState.m_width;
 		init.resolution.height = m_viewState.m_height;
